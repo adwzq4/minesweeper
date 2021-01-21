@@ -1,19 +1,35 @@
 import React from 'react';
 import ReactDOM from 'react-dom';
 import './index.css';
-import App from './App';
+//import App from './App';
 import reportWebVitals from './reportWebVitals';
 
-var squares = [];
-
 class Square extends React.Component {
+    render() {
+        return (
+            <button className={this.props.className}
+                    disabled={this.props.disabled}
+                    onClick={this.props.checkSquare}
+                    style={
+                        {height: this.props.size,
+                        width: this.props.size,
+                        fontSize: this.props.font}
+                    }
+                    onContextMenu={(event) => {
+                        this.props.toggleFlag(this.props.x, this.props.y);
+                        event.preventDefault();
+                        return false;
+                    }}>
+                {this.props.text}
+            </button>
+        );
+    }
+}
+
+class Board extends React.Component {
     constructor(props) {
         super(props);
         this.state = {
-            value: "unchecked",
-            text: "",
-            disabled: false,
-            className: "square unChecked",
             size: 0,
             font: 0,
         };
@@ -23,7 +39,6 @@ class Square extends React.Component {
     }
 
     componentDidMount() {
-        squares.push(this);
         window.addEventListener("resize", this.windowResized);
         this.updateWindowWidth();
     }
@@ -34,12 +49,10 @@ class Square extends React.Component {
 
     updateWindowWidth() {
         let _this = this;
-        setTimeout(function() {
-            let s = Math.ceil(Math.min(window.innerHeight-120, window.innerWidth-320)/_this.props.size);
-            _this.setState({
-                size: s.toString()+"px",
-                font: Math.floor(s*2/3).toString()+"px"
-            });
+        let s = Math.ceil(Math.min(window.innerHeight-100, window.innerWidth-300)/_this.props.dimensions);
+        _this.setState({
+            size: s.toString()+"px",
+            font: Math.floor(s*2/3).toString()+"px"
         });
     }
 
@@ -53,101 +66,21 @@ class Square extends React.Component {
         }, 500);
     }
 
-    toggleFlag() {
-        if (this.state.value === "unchecked") {
-            this.setState({value: "flagged"});
-            this.setState({text: "F"});
-        }
-        else if (this.state.value === "flagged") {
-            this.setState({value: "unchecked"});
-            this.setState({text: ""});
-        }
-    }
-
-    checkSquare() {
-        if (this.state.value !== "flagged") {
-            if (this.props.mined) {
-                document.getElementById("gameStatus").innerHTML = "GAME OVER";
-                document.getElementById("gameStatus").classList.add("red");
-                this.setState({text: "B", value: "boom", className: "square boom"});
-                for (let i = 0; i < squares.length; i++) {
-                    squares[i].setState({disabled: true});
-                }
-            }
-            else {
-                this.setState({value: "checked", className: "square noBoom"}, () => {
-                    let count = this.countNeighbors();
-
-                    if (count > 0) this.setState({text: count});
-                    else {
-                        for (let i = 0; i < squares.length; i++) {
-                            if (Math.abs(squares[i].props.x - this.props.x) <= 1 &&
-                                Math.abs(squares[i].props.y - this.props.y) <= 1 &&
-                                squares[i].state.value === "unchecked" &&
-                                squares[i] !== this
-                            ) {
-                                squares[i].checkSquare();
-                            }
-                        }
-                    }
-                });
-
-                this.checkWin();
-            }
-        }
-    }
-
-    checkWin() {
-        let won = true;
-        for (let i = 0; i < squares.length; i++) {
-            if ((squares[i].props.mined && squares[i].state.value !== "flagged") ||
-                (squares[i].props.mined === false && squares[i].state.value === "flagged")) {
-                won = false;
-                break;
-            }
-        }
-        if (won) {
-            document.getElementById("gameStatus").innerHTML = "You won!";
-            document.getElementById("gameStatus").classList.add("green");
-        }
-    }
-
-    countNeighbors() {
-        let count = 0
-        squares.forEach((square) => {
-            if (Math.abs(square.props.x - this.props.x) <= 1 &&
-                Math.abs(square.props.y - this.props.y) <= 1 &&
-                square.props.mined
-            ) count++;
-        });
-
-        return count;
-    }
-
-
-    render() {
-        return (
-            <button className={this.state.className} disabled={this.state.disabled}
-                    onClick={() => this.checkSquare()}
-                    style={{height: this.state.size, width: this.state.size, fontSize: this.state.font}}
-                    onContextMenu={(event) => {
-                        this.toggleFlag();
-                        event.preventDefault();
-                        return false;
-                    }}>
-                {this.state.text}
-            </button>
-        );
-    }
-}
-
-class Board extends React.Component {
     renderSquare(x, y) {
-        return <Square x={x} y={y} id={x*y+x} mined={Math.random() >= 0.85}
-                       size={this.props.y} />;
+        return <Square className={this.props.squares[y][x].className}
+                       font={this.state.font}
+                       checkSquare={() => this.props.checkSquare(x, y)}
+                       toggleFlag={() => this.props.toggleFlag(x, y)}
+                       text={this.props.squares[y][x].text}
+                       size={this.state.size}
+                       disabled={this.props.squares[y][x].disabled}
+                       x={x} y={y}/>;
     }
 
     render() {
+        let s = Math.ceil(Math.min(window.innerHeight-100, window.innerWidth-300)/this.props.dimensions);
+        // eslint-disable-next-line react/no-direct-mutation-state
+        this.state.size = s.toString()+"px";
         const board = [...Array(this.props.y).keys()].map((i) =>
             <tr key={i.toString()} className="board-row">
                 {[...Array(this.props.x).keys()].map((j) =>
@@ -168,22 +101,41 @@ class Game extends React.Component {
     constructor(props) {
         super(props);
         this.state = {
+            squares: this.newMap(10),
             dimensions: 10,
             time: 0,
+            difficulty: 15,
         };
+        this.timer = this.startClock();
     }
 
     updateClock() {
+        this.setState({time: this.state.time + 1});
+    }
+
+    startClock() {
+        clearInterval(this.timer);
+        this.setState({time: 0});
         let _this = this;
-        setInterval(function(){_this.setState({time: _this.state.time + 1}); }, 1000);
+        return setInterval(function() {_this.updateClock();}, 1000);
     }
 
-    componentDidMount() {
-        this.updateClock();
-    }
+    newMap(n) {
+        let squares = [];
+        for (let i = 0; i < n; i++) {
+            squares.push([]);
+            for (let j = 0; j < n; j++) {
+                squares[i].push({
+                    value: "unchecked",
+                    mined: Math.random() >= 0.85,
+                    text: "",
+                    disabled: false,
+                    className: "square unChecked",
+                });
+            }
+        }
 
-    renderBoard(x, y) {
-        return <Board x={x} y={y} id={"board"}/>;
+        return squares;
     }
 
     validate() {
@@ -194,20 +146,128 @@ class Game extends React.Component {
         }
     }
 
+    toggleFlag(x, y) {
+        let squares = this.state.squares;
+        if (this.state.squares[y][x].value === "unchecked") {
+            squares[y][x].value = "flagged";
+            squares[y][x].text = "F";
+        }
+        else if (this.state.squares[y][x].value === "flagged") {
+            squares[y][x].value = "unchecked";
+            squares[y][x].text = "";
+        }
+        this.setState({squares: squares});
+    }
+
+    checkSquare(x, y) {
+        if (this.state.squares[y][x].value !== "flagged") {
+            let squares = this.state.squares;
+            if (this.state.squares[y][x].mined) {
+                document.getElementById("gameStatus").innerHTML = "GAME OVER";
+                document.getElementById("gameStatus").classList.add("red");
+                clearInterval(this.timer);
+
+                squares[y][x].text = "B";
+                squares[y][x].value = "boom";
+                squares[y][x].className = "square boom";
+                for (let i = 0; i < this.state.dimensions; i++) {
+                    for (let j = 0; j < this.state.dimensions; j++) {
+                        squares[i][j].disabled = true;
+                    }
+                }
+                this.setState({squares: squares});
+            }
+
+            else {
+                let count = this.countNeighbors(x, y);
+
+                squares[y][x].value = "checked";
+                squares[y][x].className = "square noBoom";
+
+                if (count > 0) {
+                    squares[y][x].text = count;
+                    this.setState({squares: squares});
+                }
+                else {
+                    this.setState({squares: squares}, () => {
+                        for (let i = 0; i < this.state.dimensions; i++) {
+                            for (let j = 0; j < this.state.dimensions; j++) {
+                                if (Math.abs(j - x) <= 1 &&
+                                    Math.abs(i - y) <= 1 &&
+                                    this.state.squares[i][j].value === "unchecked" &&
+                                    !(x === j && y === i)
+                                ) {
+                                    this.checkSquare(j, i);
+                                }
+                            }
+                        }
+                    });
+                }
+
+                this.checkWin();
+            }
+        }
+    }
+
+    checkWin() {
+        let won = true;
+        for (let i = 0; i < this.state.dimensions; i++) {
+            for (let j = 0; j < this.state.dimensions; j++) {
+                if ((this.state.squares[i][j].mined && this.state.squares[i][j].value !== "flagged") ||
+                     this.state.squares[i][j].value === "unchecked" ||
+                    (this.state.squares[i][j].mined === false && this.state.squares[i][j].value === "flagged")) {
+                    won = false;
+                    break;
+                }
+            }
+        }
+
+        if (won) {
+            document.getElementById("gameStatus").innerHTML = "You won!";
+            document.getElementById("gameStatus").classList.add("green");
+            clearInterval(this.timer);
+        }
+    }
+
+    countNeighbors(x, y) {
+        let count = 0;
+        for (let i = 0; i < this.state.dimensions; i++) {
+            for (let j = 0; j < this.state.dimensions; j++) {
+                if (Math.abs(j - x) <= 1 &&
+                    Math.abs(i - y) <= 1 &&
+                    this.state.squares[i][j].mined
+                ) count++;
+            }
+        }
+
+        return count;
+    }
+
+    renderBoard(x, y) {
+        return <Board x={x} y={y}
+                      dimensions={this.state.dimensions}
+                      squares={this.state.squares}
+                      checkSquare={(j, i) => this.checkSquare(j, i)}
+                      toggleFlag={(j, i) => this.toggleFlag(j, i)}/>;
+    }
+
     render() {
         return (
             <div className="game">
                 <div className="game-info">
-                    <p className="game-status" id="gameStatus">{"Welcome"}</p>
+                    <p className="game-status" id="gameStatus">{"Welcome to Minesweeper"}</p>
                     <p className="clock" id="clock">{this.state.time}</p>
                     <button className="new-game-button"
                             onClick={() => {
-                                console.log(typeof(document.getElementById("dimensions").value));
+                                document.getElementById("gameStatus").innerHTML = "Welcome to Minesweeper";
+                                document.getElementById("gameStatus").classList.remove("green", "red");
+                                let diff = parseInt(document.querySelector('input[name="difficulty"]:checked').value);
+                                let dim = 10;
                                 if (document.getElementById("dimensions").value !== "") {
-                                    this.setState({dimensions: parseInt(document.getElementById("dimensions").value),
-                                    time: 0});
+                                    dim = parseInt(document.getElementById("dimensions").value);
                                 }
-                                else this.setState({dimensions: 10, time: 0});
+                                this.setState({dimensions: dim, time: 0, difficulty: diff, squares: this.newMap(dim)});
+                                this.startClock();
                             }}>
                         New Game</button>
                     <form id="dims" className="dims">
@@ -215,16 +275,17 @@ class Game extends React.Component {
                         <input id="dimensions" type="text" placeholder={10} onBlur={this.validate}/>
                     </form><br/><br/>
                     <p>Select difficult:</p>
-                    <input type="radio" id="easy" defaultChecked={true} name="difficulty" value="easy"/>
+                    <input type="radio" id="easy" defaultChecked={true} name="difficulty" value="15"/>
                     <label form="easy">Easy</label>
-                    <input type="radio" id="medium" name="difficulty" value="medium"/>
+                    <input type="radio" id="medium" name="difficulty" value="25"/>
                     <label form="easy">Medium</label>
-                    <input type="radio" id="hard" name="difficulty" value="hard"/>
+                    <input type="radio" id="hard" name="difficulty" value="35"/>
                     <label form="easy">Hard</label>
-
-                    <ol>{/* TODO */}</ol>
+                    <ol>{}</ol>
                 </div>
-                <div className="game-board" id="gameBoard">
+                <div className="game-board" id="gameBoard"
+                    style={{right: (window.innerWidth-220-Math.min(window.innerHeight-100, window.innerWidth-280))/2,
+                            top: (window.innerHeight-Math.min(window.innerHeight-100, window.innerWidth-280))/2}}>
                     {this.renderBoard(this.state.dimensions, this.state.dimensions)}
                 </div>
             </div>
@@ -239,7 +300,6 @@ ReactDOM.render(
   document.getElementById('root')
 );
 
-// If you want to start measuring performance in your app, pass a function
-// to log results (for example: reportWebVitals(console.log))
-// or send to an analytics endpoint. Learn more: https://bit.ly/CRA-vitals
+// If you want to start measuring performance in your app, pass a function to log results
+// (e.g. reportWebVitals(console.log)) or send to an analytics endpoint. Learn more: https://bit.ly/CRA-vitals
 reportWebVitals();
