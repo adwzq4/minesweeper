@@ -1,6 +1,5 @@
 body {
-  font: 14px "Century Gothic", Futura, sans-serif;
-  margin: 20px;
+  background-color: #dbc8ac;
 }
 
 ol, ul {
@@ -55,8 +54,13 @@ ol, ul {
 }
 
 .new-game-button {
-  margin-top: 60px;
-  margin-bottom: 20px;
+  margin-top: 40px;
+  margin-bottom: 40px;
+  font-weight: bold;
+  font-size: 24px;
+  padding: 10px;
+  background-color: lemonchiffon;
+  border: 4px groove darkslategrey;
 }
 
 .dims {
@@ -79,30 +83,59 @@ ol, ul {
 }
 
 .game {
-  background-color: #d9b784;
+
 }
 
 .game-board {
   position: fixed;
-  right: 60px;
-  top: 60px;
+/*  right: 60px;
+  top: 60px;*/
+}
+
+.icon {
+  position: relative;
 }
 
 .game-info {
   position: fixed;
+  border-radius: 25px;
   left: 20px;
   top: 20px;
   bottom: 20px;
   background-color: #5da8ff;
   border: 4px solid #000000;
   float: left;
-  width: 200px;
-  margin-left: 10px;
+  width: 225px;
+  margin-right: 10px;
   text-align: center;
+  overflow: auto;
 }
 
 .clock {
-  font-size: 40px;
+  font-size: 30px;
   font-weight: bold;
-  font-family: Onyx;
+}
+
+label {
+  font-size: 18px;
+}
+
+p {
+  font-size: 18px;
+}
+
+::-webkit-scrollbar {
+  width: 10px;
+}
+
+::-webkit-scrollbar-track {
+  background: #f1f1f1;
+}
+
+::-webkit-scrollbar-thumb {
+  background: #888;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: #555;
 }

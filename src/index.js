@@ -2,85 +2,43 @@ import React from 'react';
 import ReactDOM from 'react-dom';
 import './index.css';
 //import App from './App';
+import { BsFlagFill } from "react-icons/bs";
+import { GiUnlitBomb } from "react-icons/gi";
 import reportWebVitals from './reportWebVitals';
 
-class Square extends React.Component {
-    render() {
-        return (
-            <button className={this.props.className}
-                    disabled={this.props.disabled}
-                    onClick={this.props.checkSquare}
-                    style={
-                        {height: this.props.size,
-                        width: this.props.size,
-                        fontSize: this.props.font}
-                    }
-                    onContextMenu={(event) => {
-                        this.props.toggleFlag(this.props.x, this.props.y);
-                        event.preventDefault();
-                        return false;
-                    }}>
-                {this.props.text}
-            </button>
-        );
-    }
+function Square(props) {
+    return (
+        <button className={props.className}
+                disabled={props.disabled}
+                onClick={props.checkSquare}
+                style={{
+                    height: props.size,
+                    width: props.size,
+                    fontSize: props.font
+                }}
+                onContextMenu={(event) => {
+                    props.toggleFlag(props.x, props.y);
+                    event.preventDefault();
+                    return false;
+                }}>
+            {props.text}
+        </button>
+    );
 }
 
 class Board extends React.Component {
-    constructor(props) {
-        super(props);
-        this.state = {
-            size: 0,
-            font: 0,
-        };
-        this.timer = null;
-        this.windowResized = this.windowResized.bind(this);
-        this.updateWindowWidth = this.updateWindowWidth.bind(this);
-    }
-
-    componentDidMount() {
-        window.addEventListener("resize", this.windowResized);
-        this.updateWindowWidth();
-    }
-
-    componentWillUnmount() {
-        window.removeEventListener("resize", this.windowResized);
-    }
-
-    updateWindowWidth() {
-        let _this = this;
-        let s = Math.ceil(Math.min(window.innerHeight-100, window.innerWidth-300)/_this.props.dimensions);
-        _this.setState({
-            size: s.toString()+"px",
-            font: Math.floor(s*2/3).toString()+"px"
-        });
-    }
-
-    windowResized() {
-        let _this = this;
-        if (this.timer) {
-            clearTimeout(this.timer);
-        }
-        this.timer = setTimeout(function() {
-            _this.updateWindowWidth();
-        }, 500);
-    }
-
     renderSquare(x, y) {
         return <Square className={this.props.squares[y][x].className}
-                       font={this.state.font}
+                       font={this.props.font}
                        checkSquare={() => this.props.checkSquare(x, y)}
                        toggleFlag={() => this.props.toggleFlag(x, y)}
                        text={this.props.squares[y][x].text}
-                       size={this.state.size}
+                       size={this.props.size}
                        disabled={this.props.squares[y][x].disabled}
                        x={x} y={y}/>;
     }
 
     render() {
-        let s = Math.ceil(Math.min(window.innerHeight-100, window.innerWidth-300)/this.props.dimensions);
-        // eslint-disable-next-line react/no-direct-mutation-state
-        this.state.size = s.toString()+"px";
         const board = [...Array(this.props.y).keys()].map((i) =>
             <tr key={i.toString()} className="board-row">
                 {[...Array(this.props.x).keys()].map((j) =>
@@ -105,8 +63,42 @@ class Game extends React.Component {
             dimensions: 10,
             time: 0,
             difficulty: 15,
+            size: 0,
+            font: 0,
         };
-        this.timer = this.startClock();
+
+        this.timer = null;
+        this.windowResized = this.windowResized.bind(this);
+        this.updateWindowWidth = this.updateWindowWidth.bind(this);
+        this.clock = this.startClock();
+    }
+
+    componentDidMount() {
+        window.addEventListener("resize", this.windowResized);
+        this.updateWindowWidth();
+    }
+
+    componentWillUnmount() {
+        window.removeEventListener("resize", this.windowResized);
+    }
+
+    updateWindowWidth() {
+        let _this = this;
+        let s = Math.floor(Math.min(window.innerHeight-100, window.innerWidth-280)/_this.state.dimensions);
+        _this.setState({
+            size: s.toString()+"px",
+            font: Math.floor(s*2/3).toString()+"px"
+        });
+    }
+
+    windowResized() {
+        let _this = this;
+        if (this.timer) {
+            clearTimeout(this.timer);
+        }
+        this.timer = setTimeout(function() {
+            _this.updateWindowWidth();
+        }, 250);
     }
 
     updateClock() {
@@ -114,7 +106,7 @@ class Game extends React.Component {
     }
 
     startClock() {
-        clearInterval(this.timer);
+        clearInterval(this.clock);
         this.setState({time: 0});
         let _this = this;
         return setInterval(function() {_this.updateClock();}, 1000);
@@ -141,7 +133,7 @@ class Game extends React.Component {
     validate() {
         let x = parseInt(document.getElementById("dimensions").value);
 
-        if (isNaN(x) || x < 5 || x > 50) {
+        if (isNaN(x) || x < 5 || x > 30) {
             document.getElementById("dimensions").value = "10";
         }
     }
@@ -150,13 +142,17 @@ class Game extends React.Component {
         let squares = this.state.squares;
         if (this.state.squares[y][x].value === "unchecked") {
             squares[y][x].value = "flagged";
-            squares[y][x].text = "F";
+            squares[y][x].text = <BsFlagFill
+                style={{height: this.state.font,
+                    width: this.state.font,}}/>;
         }
         else if (this.state.squares[y][x].value === "flagged") {
             squares[y][x].value = "unchecked";
             squares[y][x].text = "";
         }
-        this.setState({squares: squares});
+        this.setState({squares: squares}, () => {
+            this.checkWin();
+        });
     }
 
     checkSquare(x, y) {
@@ -165,14 +161,20 @@ class Game extends React.Component {
             if (this.state.squares[y][x].mined) {
                 document.getElementById("gameStatus").innerHTML = "GAME OVER";
                 document.getElementById("gameStatus").classList.add("red");
-                clearInterval(this.timer);
+                clearInterval(this.clock);
 
-                squares[y][x].text = "B";
                 squares[y][x].value = "boom";
                 squares[y][x].className = "square boom";
                 for (let i = 0; i < this.state.dimensions; i++) {
                     for (let j = 0; j < this.state.dimensions; j++) {
                         squares[i][j].disabled = true;
+                        if (this.state.squares[i][j].mined && this.state.squares[i][j].value !== "flagged") {
+                            squares[i][j].text = <GiUnlitBomb
+                                style={{height: this.state.font,
+                                    width: this.state.font,
+                                    color: "black",
+                                }}/>;
+                        }
                     }
                 }
                 this.setState({squares: squares});
@@ -214,7 +216,6 @@ class Game extends React.Component {
         for (let i = 0; i < this.state.dimensions; i++) {
             for (let j = 0; j < this.state.dimensions; j++) {
                 if ((this.state.squares[i][j].mined && this.state.squares[i][j].value !== "flagged") ||
-                     this.state.squares[i][j].value === "unchecked" ||
                     (this.state.squares[i][j].mined === false && this.state.squares[i][j].value === "flagged")) {
                     won = false;
                     break;
@@ -225,7 +226,17 @@ class Game extends React.Component {
         if (won) {
             document.getElementById("gameStatus").innerHTML = "You won!";
             document.getElementById("gameStatus").classList.add("green");
-            clearInterval(this.timer);
+            clearInterval(this.timer)
+            let squares = this.state.squares;
+            for (let i = 0; i < this.state.dimensions; i++) {
+                for (let j = 0; j < this.state.dimensions; j++) {
+                    if (this.state.squares[i][j].value === "unchecked") {
+                        squares[i][j].value = "checked";
+                        squares[i][j].className = "square noBoom";
+                    }
+                }
+            }
+            this.setState({squares: squares});
         }
     }
 
@@ -244,7 +255,8 @@ class Game extends React.Component {
     }
 
     renderBoard(x, y) {
-        return <Board x={x} y={y}
+        return <Board x={x} y={y} size={this.state.size}
+                      font={this.state.font}
                       dimensions={this.state.dimensions}
                       squares={this.state.squares}
                       checkSquare={(j, i) => this.checkSquare(j, i)}
@@ -252,11 +264,16 @@ class Game extends React.Component {
     }
 
     render() {
+        let s = Math.ceil(Math.min(window.innerHeight-100, window.innerWidth-280)/this.state.dimensions);
+        // eslint-disable-next-line react/no-direct-mutation-state
+        this.state.size = s.toString()+"px";
+        // eslint-disable-next-line react/no-direct-mutation-state
+        this.state.font = Math.floor(s*2/3).toString()+"px";
         return (
             <div className="game">
                 <div className="game-info">
                     <p className="game-status" id="gameStatus">{"Welcome to Minesweeper"}</p>
-                    <p className="clock" id="clock">{this.state.time}</p>
+                    <p className="clock" id="clock">{`Time: ${this.state.time}`}</p>
                     <button className="new-game-button"
                             onClick={() => {
                                 document.getElementById("gameStatus").innerHTML = "Welcome to Minesweeper";
@@ -267,14 +284,16 @@ class Game extends React.Component {
                                     dim = parseInt(document.getElementById("dimensions").value);
                                 }
                                 this.setState({dimensions: dim, time: 0, difficulty: diff, squares: this.newMap(dim)});
-                                this.startClock();
+                                clearInterval(this.clock);
+                                this.clock = this.startClock();
                             }}>
-                        New Game</button>
+                        New Game
+                    </button>
                     <form id="dims" className="dims">
-                        <label form="dimensions">Select the map's dimensions (5-50):</label><br/>
+                        <label form="dimensions">Select the map's dimensions (5-30):</label><br/><br/>
                         <input id="dimensions" type="text" placeholder={10} onBlur={this.validate}/>
                     </form><br/><br/>
-                    <p>Select difficult:</p>
+                    <p>Select difficulty:</p>
                     <input type="radio" id="easy" defaultChecked={true} name="difficulty" value="15"/>
                     <label form="easy">Easy</label>
                     <input type="radio" id="medium" name="difficulty" value="25"/>
@@ -283,9 +302,9 @@ class Game extends React.Component {
                     <label form="easy">Hard</label>
                     <ol>{}</ol>
                 </div>
-                <div className="game-board" id="gameBoard"
-                    style={{right: (window.innerWidth-220-Math.min(window.innerHeight-100, window.innerWidth-280))/2,
-                            top: (window.innerHeight-Math.min(window.innerHeight-100, window.innerWidth-280))/2}}>
+                <div id="gameBoard" className="game-board"
+                     style={{right: (window.innerWidth-250-Math.min(window.innerHeight-100, window.innerWidth-280))/2,
+                    top: (window.innerHeight-Math.min(window.innerHeight-100, window.innerWidth-280))/2}}>
                     {this.renderBoard(this.state.dimensions, this.state.dimensions)}
                 </div>
             </div>
