@@ -67,7 +67,9 @@ class Board extends React.Component {
     const board = [...Array(this.props.y).keys()].map((i) =>
         <tr key={i.toString()} className="board-row">
           {[...Array(this.props.x).keys()].map((j) =>
-              <td key={(i*j+j).toString()}>{this.renderSquare(j, i)}</td>
+              <td key={(i*j+j).toString()}>
+                {this.renderSquare(j, i)}
+              </td>
           )}
         </tr>
     );

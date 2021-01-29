@@ -1,11 +1,5 @@
 const HighScore = require('../models/high-score-model')
 
-/*HighScore.create({
-    "type": "time",
-    "difficulty": "Easy",
-    "value": 50
-}).then(() => {console.log("created")}).catch(err => console.log(err))*/
-
 exports.createScore = (req, res) => {
     const body = req.body
 
@@ -32,7 +26,6 @@ exports.createScore = (req, res) => {
             })
         })
 }
-
 // updateRates = async (req, res) => {
 //     const body = req.body
 //     if (!body) {
@@ -42,7 +35,6 @@ exports.createScore = (req, res) => {
 //     const cursor = HighScore.find( query)
 //     if ((await cursor.count()) === 0) {await HighScore.insertOne(body)}
 // }
-
 exports.deleteScore = async (req, res) => {
     await HighScore.findOneAndDelete({ _id: req.params.id }, (err, score) => {
         if (err) {
