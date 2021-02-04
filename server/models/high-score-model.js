@@ -3,7 +3,7 @@ const Schema = mongoose.Schema
 
 const HighScore = new Schema(
     {
-        type: { type: String, required: true },
+        scoreType: { type: String, required: true },
         difficulty: { type: String, required: true },
         value: { type: Number, required: true },
     },

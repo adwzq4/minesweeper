@@ -1,5 +1,10 @@
-body {
+.App {
+  text-align: center;
   background-color: #dbc8ac;
+}
+
+.body {
+
 }
 
 ol, ul {
@@ -14,6 +19,18 @@ ol, ul {
 
 .status {
   margin-bottom: 10px;
+}
+
+.square {
+  border-width: 4px;
+  border-color: #696969;
+  float: left;
+  font-size: 24px;
+  font-weight: bold;
+  height: 34px;
+  padding: 0;
+  text-align: center;
+  width: 34px;
 }
 
 .red {
@@ -69,17 +86,32 @@ ol, ul {
 }
 
 .game {
-
+  background-color: #dbc8ac;
 }
 
 .game-board {
   position: fixed;
-/*  right: 60px;
-  top: 60px;*/
+  /*  right: 60px;
+    top: 60px;*/
 }
 
 .icon {
   position: relative;
+}
+
+.game-info {
+  position: fixed;
+  border-radius: 10px;
+  left: 20px;
+  top: 20px;
+  bottom: 20px;
+  background-color: #5da8ff;
+  border: 4px solid #000000;
+  float: left;
+  width: 225px;
+  margin-right: 10px;
+  text-align: center;
+  overflow: auto;
 }
 
 .clock {
