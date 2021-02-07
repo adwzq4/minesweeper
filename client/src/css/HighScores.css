@@ -1,8 +1,37 @@
 .column {
     float: left;
     width: 20%;
-    margin: 20px;
+    margin-left: 20px;
+    margin-right: 20px;
     padding: 5px;
+}
+
+.times-header {
+    text-align: center;
+    font-weight: bold;
+    float: left;
+    margin-top: 5px;
+    margin-bottom: 0;
+    font-size: 24px;
+    width: 70%;
+    margin-right: 30%;
+}
+
+.hs-header {
+    text-align: center;
+    font-weight: bold;
+}
+
+.stats {
+    float: left;
+    width: 25%;
+    margin: 10px;
+    padding: 5px;
+    font-weight: bold;
+    font-size: 18px;
+}
+.stat-header {
+    font-size: 22px;
 }
 
 .row::after {
@@ -11,17 +40,41 @@
     display: table;
 }
 
-table {
-  border-collapse: collapse;
-  border-spacing: 0;
-  border: 1px solid #ddd;
+.table {
+    border-collapse: collapse;
+    width: 100%;
+    border-spacing: 0;
+    text-align: center;
+    border: 2px solid #ddd;
 }
 
-th, td {
-  text-align: center;
-  padding: 16px;
+.th {
+    padding: 12px;
+    font-size: 18px;
 }
 
-tr:nth-child(even) {
-  background-color: #f2f2f2;
+.td {
+    padding: 12px;
+    font-size: 16px;
+    font-weight: bold;
+}
+
+thead {
+    background-color: #f2f2f2;
+    padding: 10px;
+}
+
+.tr:nth-child(even) {
+    background-color: #f2f2f2;
+}
+
+.button {
+    margin-top: 5px;
+    margin-bottom: 5px;
+    font-weight: bold;
+    font-size: 20px;
+    border-radius: 40px;
+    padding: 10px;
+    background-color: lemonchiffon;
+    border: 3px groove darkslategrey;
 }

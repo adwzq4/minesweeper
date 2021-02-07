@@ -1,10 +1,10 @@
 .App {
   text-align: center;
-  background-color: #dbc8ac;
+  background: #dbc8ac;
 }
 
 .body {
-
+  background: #dbc8ac;
 }
 
 ol, ul {
@@ -60,10 +60,11 @@ ol, ul {
   margin-top: 40px;
   margin-bottom: 40px;
   font-weight: bold;
-  font-size: 24px;
+  font-size: 20px;
   padding: 10px;
   background-color: lemonchiffon;
-  border: 4px groove darkslategrey;
+  border: 3px groove darkslategrey;
+  border-radius: 20px;
 }
 
 .dims {
@@ -81,7 +82,7 @@ ol, ul {
 
 .game-status {
   margin-top: 40px;
-  font-size: 30px;
+  font-size: 34px;
   font-weight: bold;
 }
 
@@ -101,7 +102,7 @@ ol, ul {
 
 .game-info {
   position: fixed;
-  border-radius: 10px;
+  border-radius: 8px;
   left: 20px;
   top: 20px;
   bottom: 20px;
@@ -128,15 +129,17 @@ p {
 }
 
 ::-webkit-scrollbar {
-  width: 10px;
+  width: 6px;
 }
 
 ::-webkit-scrollbar-track {
   background: #f1f1f1;
+  border-radius: 4px;
 }
 
 ::-webkit-scrollbar-thumb {
   background: #888;
+  border-radius: 4px;
 }
 
 ::-webkit-scrollbar-thumb:hover {

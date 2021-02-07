@@ -7,7 +7,7 @@ const HighScore = new Schema(
         difficulty: { type: String, required: true },
         value: { type: Number, required: true },
     },
-    { timestamps: true },
+    { timestamps: true, },
 )
 
 module.exports = mongoose.model('high-scores', HighScore)
