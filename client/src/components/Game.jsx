@@ -68,7 +68,7 @@ class Game extends React.Component {
         super(props);
         this.state = {
             squares: null,
-            dimensions: 3,
+            dimensions: 10,
             time: 0,
             difficulty: "Easy",
             size: 0,
@@ -408,7 +408,7 @@ class Game extends React.Component {
                                 document.getElementById("gameStatus").classList.remove("green", "red");
 
                                 let diff = document.querySelector('input[name="difficulty"]:checked').value;
-                                let dim = 3;
+                                let dim = 10;
                                 if (document.getElementById("dimensions").value !== "") {
                                     dim = parseInt(document.getElementById("dimensions").value);
                                 }
