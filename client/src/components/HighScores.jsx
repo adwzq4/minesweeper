@@ -39,7 +39,6 @@ class HighScores extends Component {
 
     componentDidMount = async () => {
         await api.getStats().then(stats => {
-            //console.log(stats.data.data)
             this.setState({
                 easyMines: stats.data.data["mines"]["Easy"],
                 mediumMines: stats.data.data["mines"]["Medium"],

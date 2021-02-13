@@ -31,25 +31,24 @@ exports.getStats = async (req, res) => {
     for (let i = 0; i < statTypes.length; i++) {
         stats[statTypes[i]] = {}
         for (let j = 0; j < diffs.length; j++) {
-            await HighScore.exists({scoreType: statTypes[i], difficulty: diffs[j]}, (err, result) => {
-                if (!result) {
-                    HighScore.create({
-                        "scoreType": statTypes[i],
-                        "difficulty": diffs[j],
-                        "value": 0
-                    }).then(r => {}).catch(err => console.log(err))
-                }
-            })
+            const stat = await HighScore.find({scoreType: statTypes[i], difficulty: diffs[j]})
+                .catch(err => {
+                    return res.status(400).json({success: false, error: err})
+                })
 
-            await HighScore.find({scoreType: statTypes[i], difficulty: diffs[j]},  (err, stat) => {
-                if (err) {
-                    return res.status(400).json({ success: false, error: err })
-                }
-
-                if (stat) {
-                    stats[statTypes[i]][diffs[j]] = stat
-                }
-            }).catch(err => console.log(err))
+            if (stat.length === 0) {
+                await HighScore.create({
+                    "scoreType": statTypes[i],
+                    "difficulty": diffs[j],
+                    "value": 0
+                })
+                    .then(r => {stats[statTypes[i]][diffs[j]] = [r]
+                        console.log(r)})
+                    .catch(err => console.log(err))
+            }
+            else {
+                stats[statTypes[i]][diffs[j]] = stat
+            }
         }
     }
 
@@ -94,12 +93,13 @@ exports.getScores = async (req, res) => {
 
     for (let i = 0; i < diffs.length; i++) {
         await HighScore.find({scoreType: "time", difficulty: diffs[i]}, (err, scores) => {
-            //console.log(scores)
             if (err) {
                 return res.status(400).json({ success: false, error: err })
             }
-
-            allScores[diffs[i]] = scores
+            //if (scores) {
+                allScores[diffs[i]] = scores
+            //}
+            //else allScores[diffs[i]] = []
         }).catch(err => console.log(err))
     }
 
@@ -107,7 +107,10 @@ exports.getScores = async (req, res) => {
         if (err) {
             return res.status(400).json({ success: false, error: err })
         }
-        allScores["Rates"] = scores
+        //if (scores) {
+            allScores["Rates"] = scores
+        //}
+        //else allScores["Rates"] = []
     }).catch(err => console.log(err))
 
     return res.status(200).json({ success: true, data: allScores })
@@ -130,7 +133,7 @@ exports.deleteScore = async (req, res) => {
 }
 
 exports.deleteAllScores = async (req, res) => {
-    await HighScore.deleteMany({ $or: [{scoreType: "time"}, {scoreType: "rate"}]}, (err) => {
+    await HighScore.deleteMany({}, (err) => {
         if (err) {
             return res.status(400).json({ success: false, error: err })
         }
