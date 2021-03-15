@@ -1,5 +1,8 @@
 const HighScore = require('../models/high-score-model')
 
+const statTypes = ["mines", "wins", "deaths"]
+const diffs = ["Easy", "Medium", "Hard"]
+
 exports.createScore = (req, res) => {
     const body = req.body
     if (!body) {
@@ -25,8 +28,6 @@ exports.createScore = (req, res) => {
 
 exports.getStats = async (req, res) => {
     let stats = {}
-    let statTypes = ["mines", "wins", "deaths"]
-    let diffs = ["Easy", "Medium", "Hard"]
 
     for (let i = 0; i < statTypes.length; i++) {
         stats[statTypes[i]] = {}
@@ -89,17 +90,13 @@ exports.updateStats = async (req, res) => {
 
 exports.getScores = async (req, res) => {
     let allScores = {}
-    let diffs = ["Easy", "Medium", "Hard"]
 
     for (let i = 0; i < diffs.length; i++) {
         await HighScore.find({scoreType: "time", difficulty: diffs[i]}, (err, scores) => {
             if (err) {
                 return res.status(400).json({ success: false, error: err })
             }
-            //if (scores) {
-                allScores[diffs[i]] = scores
-            //}
-            //else allScores[diffs[i]] = []
+            allScores[diffs[i]] = scores
         }).catch(err => console.log(err))
     }
 
@@ -107,10 +104,7 @@ exports.getScores = async (req, res) => {
         if (err) {
             return res.status(400).json({ success: false, error: err })
         }
-        //if (scores) {
-            allScores["Rates"] = scores
-        //}
-        //else allScores["Rates"] = []
+        allScores["Rates"] = scores
     }).catch(err => console.log(err))
 
     return res.status(200).json({ success: true, data: allScores })

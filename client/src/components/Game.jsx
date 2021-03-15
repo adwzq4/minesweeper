@@ -104,6 +104,7 @@ class Game extends React.Component {
         if (this.timer) {
             clearTimeout(this.timer);
         }
+
         this.timer = setTimeout(function() {
             _this.updateWindowWidth();
         }, 250);
@@ -192,8 +193,8 @@ class Game extends React.Component {
                                 if (Math.abs(j - x) <= 1 &&
                                     Math.abs(i - y) <= 1 &&
                                     this.state.squares[i][j].value === "unchecked" &&
-                                    !(x === j && y === i)
-                                ) {
+                                    !(x === j && y === i))
+                                {
                                     this.checkSquare(j, i);
                                 }
                             }
@@ -289,7 +290,7 @@ class Game extends React.Component {
             times = scores.data.data[this.state.difficulty]
         }).catch(err => console.log(err))
 
-        let r = count/this.state.time
+        let r = count/this.state.time * 60
         let i = 0
         for (i; i < rates.length; i++) {
             if (rates[i].difficulty === this.state.difficulty) {
@@ -337,6 +338,7 @@ class Game extends React.Component {
         else {
             let max = times[0].value
             let maxIndex = 0
+
             for (let i = 0; i < times.length; i++) {
                 if (times[i].value > max) {
                     max = times[i].value
@@ -348,6 +350,7 @@ class Game extends React.Component {
                 api.deleteScore(times[maxIndex]._id).then(() => {
                     console.log(`${times[maxIndex]._id} deleted`)
                 }).catch(err => console.log(err))
+
                 api.insertScore({
                     "scoreType": "time",
                     "difficulty": `${this.state.difficulty}`,
@@ -429,7 +432,7 @@ class Game extends React.Component {
                     <input type="radio" id="hard" name="difficulty" value="Hard"/>
                     <label form="easy">Hard</label><br/><br/><br/>
                     <Link to="/high-scores" className="nav-link">
-                        <button className={"button"} type={"button"}>
+                        <button className={"new-game-button"} type={"button"}>
                             High Scores
                         </button>
                     </Link>

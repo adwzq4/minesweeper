@@ -53,10 +53,8 @@ class HighScores extends Component {
         })
 
         await api.getScores().then(scores => {
-            //console.log(scores.data.data)
             this.setState({
-                bestRates: scores.data.data["Rates"].sort(
-                    function(a, b) {return a.value - b.value}),
+                bestRates: scores.data.data["Rates"],
                 bestEasyTimes: scores.data.data["Easy"].sort(
                     function(a, b) {return a.value - b.value}),
                 bestMediumTimes: scores.data.data["Medium"].sort(
@@ -70,30 +68,61 @@ class HighScores extends Component {
     render() {
         const { bestEasyTimes, bestMediumTimes, bestHardTimes, bestRates } = this.state
 
-        const easyTimes = [...Array(bestEasyTimes.length).keys()].map((i) =>
-             <tr className={"tr"} id={i.toString()}>
-                 <td className={"td"}>{i+1}</td>
-                 <td className={"td"}>{bestEasyTimes[i].value}</td>
-             </tr>
-        )
-        const mediumTimes = [...Array(bestMediumTimes.length).keys()].map((i) =>
-            <tr className={"tr"} id={i.toString()}>
-                <td className={"td"}>{i+1}</td>
-                <td className={"td"}>{bestMediumTimes[i].value}</td>
-            </tr>
-        )
-        const hardTimes = [...Array(bestHardTimes.length).keys()].map((i) =>
-            <tr className={"tr"} id={i.toString()}>
-                <td className={"td"}>{i+1}</td>
-                <td className={"td"}>{bestHardTimes[i].value}</td>
-            </tr>
-        )
-        const rates = [...Array(bestRates.length).keys()].map((i) =>
-            <tr className={"tr"} id={i.toString()}>
-                <td className={"td"}>{bestRates[i].value}</td>
-                <td className={"td"}>{bestRates[i].difficulty}</td>
-            </tr>
-        )
+        let easyTimes = <tr className={"tr"}>
+            <td className={"td"}>-</td>
+            <td className={"td"}>-</td>
+        </tr>;
+
+        let mediumTimes = <tr className={"tr"}>
+            <td className={"td"}>-</td>
+            <td className={"td"}>-</td>
+        </tr>;
+
+        let hardTimes = <tr className={"tr"}>
+            <td className={"td"}>-</td>
+            <td className={"td"}>-</td>
+        </tr>;
+
+        let rates = <tr className={"tr"}>
+            <td className={"td"}>-</td>
+            <td className={"td"}>-</td>
+        </tr>;
+
+        if (bestEasyTimes.length) {
+            easyTimes = [...Array(bestEasyTimes.length).keys()].map((i) =>
+                <tr className={"tr"} id={i.toString()}>
+                    <td className={"td"}>{i+1}</td>
+                    <td className={"td"}>{bestEasyTimes[i].value}</td>
+                </tr>
+            )
+        }
+
+        if (bestMediumTimes.length) {
+            mediumTimes = [...Array(bestMediumTimes.length).keys()].map((i) =>
+                <tr className={"tr"} id={i.toString()}>
+                    <td className={"td"}>{i+1}</td>
+                    <td className={"td"}>{bestMediumTimes[i].value}</td>
+                </tr>
+            )
+        }
+
+        if (bestHardTimes.length) {
+            hardTimes = [...Array(bestHardTimes.length).keys()].map((i) =>
+                <tr className={"tr"} id={i.toString()}>
+                    <td className={"td"}>{i+1}</td>
+                    <td className={"td"}>{bestHardTimes[i].value}</td>
+                </tr>
+            )
+        }
+
+        if (bestRates.length) {
+            rates = [...Array(bestRates.length).keys()].map((i) =>
+                <tr className={"tr"} id={i.toString()}>
+                    <td className={"td"}>{bestRates[i].value.toPrecision(3).toString()+"/min"}</td>
+                    <td className={"td"}>{bestRates[i].difficulty}</td>
+                </tr>
+            )
+        }
 
         const easyMines = this.state.easyMines[0].value
         const mediumMines = this.state.mediumMines[0].value
@@ -114,13 +143,13 @@ class HighScores extends Component {
                         <h2>Easy</h2>
                         <table className={"table"}>
                             <thead>
-                            <tr className={"tr"}>
-                                <th className={"th"}>Rank</th>
-                                <th className={"th"}>Time</th>
-                            </tr>
+                                <tr className={"tr"}>
+                                    <th className={"th"}>Rank</th>
+                                    <th className={"th"}>Time</th>
+                                </tr>
                             </thead>
                             <tbody>
-                            {easyTimes}
+                                {easyTimes}
                             </tbody>
                         </table>
                     </div>
@@ -128,13 +157,13 @@ class HighScores extends Component {
                         <h2>Medium</h2>
                         <table className={"table"}>
                             <thead>
-                            <tr className={"tr"}>
-                                <th className={"th"}>Rank</th>
-                                <th className={"th"}>Time</th>
-                            </tr>
+                                <tr className={"tr"}>
+                                    <th className={"th"}>Rank</th>
+                                    <th className={"th"}>Time</th>
+                                </tr>
                             </thead>
                             <tbody>
-                            {mediumTimes}
+                                {mediumTimes}
                             </tbody>
                         </table>
                     </div>
@@ -142,13 +171,13 @@ class HighScores extends Component {
                         <h2>Hard</h2>
                         <table className={"table"}>
                             <thead>
-                            <tr className={"tr"}>
-                                <th className={"th"}>Rank</th>
-                                <th className={"th"}>Time</th>
-                            </tr>
+                                <tr className={"tr"}>
+                                    <th className={"th"}>Rank</th>
+                                    <th className={"th"}>Time</th>
+                                </tr>
                             </thead>
                             <tbody>
-                            {hardTimes}
+                                {hardTimes}
                             </tbody>
                         </table>
                     </div>
@@ -156,13 +185,13 @@ class HighScores extends Component {
                         <h2>Best Rates</h2>
                         <table className={"table"}>
                             <thead>
-                            <tr className={"tr"}>
-                                <th className={"th"}>Clearance Rate</th>
-                                <th className={"th"}>Difficulty</th>
-                            </tr>
+                                <tr className={"tr"}>
+                                    <th className={"th"}>Clearance Rate</th>
+                                    <th className={"th"}>Difficulty</th>
+                                </tr>
                             </thead>
                             <tbody>
-                            {rates}
+                                {rates}
                             </tbody>
                         </table>
                     </div>
@@ -187,11 +216,11 @@ class HighScores extends Component {
                 </div>
                 <br/><br/><br/><br/>
                 <Link to="/">
-                    <button className={"button"} style={{margin: "auto"}}>
+                    <button className={"button"}>
                         Sweep Some Mines
                     </button>
                 </Link>
-                <br/><br/><br/>
+                <br/><br/>
                 <button className={"button"} onClick={() => {
                     api.deleteAllScores().then(r => {
                         this.setState({
@@ -210,7 +239,9 @@ class HighScores extends Component {
                             hardDeaths: [{value: 0}],
                         })
                     }).catch(err => console.log(err))
-                }}>Reset All Statistics</button>
+                }}>
+                    Reset All Statistics
+                </button>
             </Container>
         )
     }
